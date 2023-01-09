@@ -33,15 +33,66 @@ most zones is implemented.
 
 [vendored files](./vendor)
 
+## Environment
+
+Works with Python 3.6.
+
+Python 3.8 gives an error when executing `compile_tzlinks.py`:
+```bash
+$ python utils/compile_tzlinks.py
+Traceback (most recent call last):
+  File "utils/compile_tzlinks.py", line 53, in <module>
+    main()
+  File "utils/compile_tzlinks.py", line 16, in main
+    tz = tzwhere.tzwhere()
+  File "utz/venv/lib/python3.8/site-packages/tzwhere/tzwhere.py", line 62, in __init__
+    self.timezoneNamesToPolygons[tzname] = WRAP(polys)
+ValueError: setting an array element with a sequence. The requested array has an inhomogeneous shape after 2 dimensions. The detected shape was (1, 2) + inhomogeneous part.
+```
+
 ## Instructions to generate files (without Make)
 
-1. Setup dev environment:  
-   `python3 -m pip install -r requirements.txt`
+1. Setup dev environment:
+
+```bash
+$ python3.6 -m venv venv
+$ source venv/bin/activate
+(venv) $ pip install -r requirements.txt
+```
+
 2. Generate links based on major cities:  
    `python3 utils/compile_tzlinks.py`
 3. Generate a list of timezones to include, based on major cities and timezones included in Android:  
    `python3 utils/compile_whitelist.py`
-5. Generate `zones.h` and `zones.c`:  
+4. Generate `zones.h` and `zones.c`:
    `python3 utils/generate_zones.py -d vendor/tzdata -r africa -r asia -r australasia -r backward -r europe -r northamerica -r pacificnew -r southamerica -w whitelist.txt -i majorcities`
 
-Include different regions in step 5 based on your preferences
+Include different regions in step 5 based on your preferences.
+(Modify the whitelist accordingly, then rerun step 4.)
+
+### Examples
+
+Build and run the example(s):
+
+```bash
+(venv) $ make examples
+gcc -c -o utz.o utz.c -I.
+gcc -c -o zones.o zones.c -I.
+gcc -c -o examples/example.o examples/example.c -I.
+examples/example.c: In function ‘main’:
+examples/example.c:13:35: warning: format ‘%d’ expects argument of type ‘int’, but argument 2 has type ‘long unsigned int’ [-Wformat=]
+   13 |   printf("Total library db size: %d B\n", sizeof(zone_rules) + sizeof(zone_abrevs) + sizeof(zone_defns) + sizeof(zone_names));
+      |                                  ~^       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                   |       |
+      |                                   int     long unsigned int
+      |                                  %ld
+gcc -o example utz.o zones.o examples/example.o -I.
+
+(venv) $ ./example
+Total library db size: 1727 B
+San Francisco, current offset: -8.0
+PST
+```
+
+Sidenote: The compiler warning only occurs on systems where the return value of sizeof is a
+`long unsigned int`. It does not occur on embedded systems where sizeof returns a smaller integer.

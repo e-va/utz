@@ -14,3 +14,5 @@ build
 example
 .mypy_cache/
 a.out
+venv
+.idea
