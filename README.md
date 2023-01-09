@@ -68,6 +68,11 @@ $ source venv/bin/activate
      ```bash
      $ python utils/compile_tzlinks.py vendor/wikipedia/list_of_tz_database_time_zones.html
      ```
+   - The `ignorelist.txt` file can be used for filtering time zones and thus
+     reducing the execution time. For that purpose the sample file must be copied \
+     `$ cp ignorelist.txt.sample ignorelist.txt` \
+     and the countries, continents or regions that should be ignored must be
+     inserted as new lines.
 3. Generate a list of timezones to include, based on major cities and timezones included in Android:  
    `$ python utils/compile_whitelist.py`
 4. Generate `zones.h` and `zones.c`:

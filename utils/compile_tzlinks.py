@@ -3,7 +3,7 @@
 
 eV Quirk
 """
-
+import os
 import unicodedata
 
 from bs4 import BeautifulSoup
@@ -12,7 +12,7 @@ from tzwhere import tzwhere
 import sys
 
 
-def parse_majorcities(soup, geocoder):
+def parse_majorcities(soup, geocoder, regions_to_ignore):
     locations_with_city = []
     table = soup.find('table', {'class': "sortable wikitable mw-datatable"})
     if table is None:
@@ -23,13 +23,15 @@ def parse_majorcities(soup, geocoder):
         if columns:
             city = columns[0].find('a').text
             country = columns[1].findAll('a')[1].text
+            if country in regions_to_ignore:
+                continue
             location = geocoder.geocode(f"{city}, {country}")
             locations_with_city.append([location, city, country])
 
     return locations_with_city
 
 
-def parse_tz_db_time_zones(soup):
+def parse_tz_db_time_zones(soup, regions_to_ignore):
     locations_with_city = []
     table = soup.findAll('table', {'class': "wikitable sortable"})[0]
     if table is None:
@@ -44,6 +46,8 @@ def parse_tz_db_time_zones(soup):
         tz_db_name = columns[1].find('a').text
         try:
             region, city = tz_db_name.split('/')
+            if region in regions_to_ignore:
+                continue
         except ValueError:
             continue
 
@@ -53,7 +57,7 @@ def parse_tz_db_time_zones(soup):
     return locations_with_city
 
 
-def main(input_file="vendor/wikipedia/majorcities.html"):
+def main(regions_to_ignore, input_file="vendor/wikipedia/majorcities.html"):
     print(f"Parsing {input_file}\r\n")
 
     geocoder = Nominatim(user_agent="utz", timeout=30)
@@ -62,10 +66,10 @@ def main(input_file="vendor/wikipedia/majorcities.html"):
 
     with open(input_file) as f:
         soup = BeautifulSoup(f, features="html.parser")
-        locations_with_city = parse_majorcities(soup, geocoder)
+        locations_with_city = parse_majorcities(soup, geocoder, regions_to_ignore)
         if locations_with_city is None:
             f.seek(0)
-            locations_with_city = parse_tz_db_time_zones(soup)
+            locations_with_city = parse_tz_db_time_zones(soup, regions_to_ignore)
 
     if locations_with_city is None:
         print("No data available, parsers might have failed")
@@ -77,12 +81,16 @@ def main(input_file="vendor/wikipedia/majorcities.html"):
         if location:
             zone = tz.tzNameAt(location.latitude, location.longitude)
             if zone:
+                zone_parts = zone.split('/')
+                if zone_parts[0] in regions_to_ignore:
+                    continue
+
                 city = unicodedata.normalize('NFD', city).encode(
                     'ascii', 'ignore').decode('ascii')
                 city = city.replace(' ', '_')
                 city = city.replace('+', 'p').replace('-', 'm')
-                if zone.split('/')[-1] not in city:
-                    alias = zone.split('/')[:-1]
+                if zone_parts[-1] not in city:
+                    alias = zone_parts[:-1]
                     alias.append(city)
                     links.append(('Link', zone, '/'.join(alias)))
                 else:
@@ -97,7 +105,12 @@ def main(input_file="vendor/wikipedia/majorcities.html"):
 
 
 if __name__ == '__main__':
+    regions_to_ignore = []
+    if os.path.isfile("ignorelist.txt"):
+        with open("ignorelist.txt") as f:
+            regions_to_ignore = f.read().split('\n')
+
     if len(sys.argv) > 1:
-        main(sys.argv[1])
+        main(regions_to_ignore, sys.argv[1])
     else:
-        main()
+        main(regions_to_ignore)
