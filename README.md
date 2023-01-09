@@ -60,12 +60,20 @@ $ source venv/bin/activate
 (venv) $ pip install -r requirements.txt
 ```
 
-2. Generate links based on major cities:  
-   `python3 utils/compile_tzlinks.py`
+2. Generate links based on major cities:
+
+   - Using the default input file (`vendor/wikipedia/majorcities.html`): \
+   `$ python utils/compile_tzlinks.py`
+   - Using the other input file (specify via CLI arg):
+     ```bash
+     $ python utils/compile_tzlinks.py vendor/wikipedia/list_of_tz_database_time_zones.html
+     ```
 3. Generate a list of timezones to include, based on major cities and timezones included in Android:  
-   `python3 utils/compile_whitelist.py`
+   `$ python utils/compile_whitelist.py`
 4. Generate `zones.h` and `zones.c`:
-   `python3 utils/generate_zones.py -d vendor/tzdata -r africa -r asia -r australasia -r backward -r europe -r northamerica -r pacificnew -r southamerica -w whitelist.txt -i majorcities`
+   ```bash
+   $ python utils/generate_zones.py -d vendor/tzdata -r africa -r asia -r australasia -r backward -r europe -r northamerica -r pacificnew -r southamerica -w whitelist.txt -i majorcities
+   ```
 
 Include different regions in step 5 based on your preferences.
 (Modify the whitelist accordingly, then rerun step 4.)
