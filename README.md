@@ -107,5 +107,15 @@ San Francisco, current offset: -8.0
 PST
 ```
 
-Sidenote: The compiler warning only occurs on systems where the return value of sizeof is a
-`long unsigned int`. It does not occur on embedded systems where sizeof returns a smaller integer.
+Sidenote: The compiler warning only occurs on systems where the return value of
+sizeof is a `long unsigned int`. It does not occur on embedded systems where
+sizeof returns a smaller integer.
+
+### Embedded
+
+In order to use this library in embedded projects the following files must be
+copied:
+- `utz.c`
+- `utz.h`
+- `zones.c`
+- `zones.h`
