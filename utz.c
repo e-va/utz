@@ -253,7 +253,7 @@ const char* get_index(const char* list, uint8_t i) {
   return list;
 }
 
-void get_zone_by_name(char* name, uzone_t* zone_out) {
+bool get_zone_by_name(char* name, uzone_t* zone_out) {
 #ifndef UTZ_GLOBAL_COUNTERS
   uint16_t utz_k;
 #endif
@@ -267,4 +267,6 @@ void get_zone_by_name(char* name, uzone_t* zone_out) {
     }
     zone++;
   }
+
+  return utz_k < NUM_ZONE_NAMES;
 }

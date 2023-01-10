@@ -8,6 +8,7 @@
 #define _UTZ_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 /**************************************************************************/
 /*                              constants                                 */
@@ -295,9 +296,9 @@ uint8_t get_next(const char** list);
  *
  *  @param name the name of the zone to find
  *  @param zone_out pointer for zone found
- *  @return void
+ *  @return true if zone was found
  */
-void get_zone_by_name(char* name, uzone_t* zone_out);
+bool get_zone_by_name(char* name, uzone_t* zone_out);
 
 int16_t udatetime_cmp(udatetime_t* dt1, udatetime_t* dt2);
 

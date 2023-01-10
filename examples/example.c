@@ -21,7 +21,12 @@ void main()
   dt.time.second = 0;
 
   uzone_t active_zone;
-  get_zone_by_name("San Francisco", &active_zone);
+  bool zone_found = get_zone_by_name("San Francisco", &active_zone);
+  if (!zone_found) {
+    printf("Requested zone was not found, exiting.\r\n");
+    return;
+  }
+
   uoffset_t offset;
   char c = get_current_offset(&active_zone, &dt, &offset);
   printf("%s, current offset: %d.%d\n", active_zone.name, offset.hours, offset.minutes / 60);
